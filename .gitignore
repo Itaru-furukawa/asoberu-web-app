@@ -25,3 +25,49 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore bundler config.
+asoberu-api/.bundle
+
+# Ignore all logfiles and tempfiles.
+asoberu-api/log/*
+asoberu-api/tmp/*
+!asoberu-api/log/.keep
+!asoberu-api/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+asoberu-api/tmp/pids/*
+!asoberu-api/tmp/pids/
+!asoberu-api/tmp/pids/.keep
+
+# Ignore uploaded files in development.
+asoberu-api/storage/*
+!asoberu-api/storage/.keep
+asoberu-api.byebug_history
+
+# Ignore master key for decrypting credentials and more.
+asoberu-api/config/master.key
+
+asoberu-frontend/.DS_Store
+asoberu-frontend/node_modules
+asoberu-frontend/dist
+
+
+# local env files
+asoberu-frontend/.env.local
+asoberu-frontend/.env.*.local
+
+# Log files
+asoberu-frontend/npm-debug.log*
+asoberu-frontend/yarn-debug.log*
+asoberu-frontend/yarn-error.log*
+asoberu-frontend/pnpm-debug.log*
+
+# Editor directories and files
+asoberu-frontend/.idea
+asoberu-frontend/.vscode
+asoberu-frontend/*.suo
+asoberu-frontend/*.ntvs*
+asoberu-frontend/*.njsproj
+asoberu-frontend/*.sln
+asoberu-frontend/*.sw?
