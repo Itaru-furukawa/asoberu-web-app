@@ -33,7 +33,7 @@
               <v-dialog
                 transition="dialog-top-transition"
                 v-model="dialog1"
-                width="50%"
+                width="65%"
               >       
                 <template v-slot:activator="{ on, attrs1 }">
                   <v-btn
@@ -42,26 +42,41 @@
                     dark
                     v-bind="attrs1"
                     v-on="on"
+                    class='font-weight-bold'
                   >
                     日程調整に参加する
                   </v-btn>
                 </template>
                 <v-card>
-                  <v-card-title class="headline grey lighten-2">
-                    Vuetify で v-dialog をつかってみる
+                  <v-card-title class="headline light-green white--text lighten-1">
+                    日程調整に参加する
                   </v-card-title>
-                  <v-card-text style="margin: 1rem auto;">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </v-card-text>
+                  <v-container class='space-playground pa-5'>
+                    <v-text-field
+                      v-model="scheduleId"
+                      type='number'
+                      label="スケジュールID"
+                    >
+                    </v-text-field>
+                    <v-text-field
+                      v-model="joinSchedulePassword"
+                      label="あいことば"
+                    >
+                    </v-text-field>
+                  </v-container>
                   <v-divider></v-divider>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
-                      color="primary"
-                      text
                       @click="dialog1 = false"
+                    >  
+                      キャンセル
+                    </v-btn>
+                    <v-btn
+                      color="primary"
+                      @click="e1 = 1"
                     >
-                      閉じる
+                      参加
                     </v-btn>
                   </v-card-actions>
                 </v-card>
@@ -78,6 +93,7 @@
                     dark
                     v-bind="attrs2"
                     v-on="on"
+                    class='font-weight-bold'
                   >
                     日程調整を始める
                   </v-btn>
@@ -117,7 +133,7 @@
                           >
                           </v-text-field>
                           <v-text-field
-                            v-model="peopleNum2"
+                            v-model="password"
                             label="あいことば"
                           >
                           </v-text-field>
@@ -151,7 +167,7 @@
                       </v-stepper-content>
 
                       <v-stepper-content step="2">
-                        <v-container class='space-playground pa-5 d-flex justify-space-between'>
+                        <v-container class='space-playground pa-5 d-flex justify-space-around'>
                           <v-date-picker
                             v-model="dates"
                             range
@@ -195,6 +211,9 @@
 </template>
 
 <style>
+  .application {
+    font-family: "Open Sans";
+  }
   .top-bgimg{
     background: url('assets/679452.jpg');
     background-size: auto;
@@ -230,7 +249,10 @@ export default {
     dialog2: false,
     scheduleName: '',
     peopleNum: '',
-    dates: []
+    password: '',
+    dates: [],
+    scheduleId: '',
+    joinSchedulePassword: ''
   }),
   computed: {
     dateRangeText () {
