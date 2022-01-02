@@ -21,39 +21,47 @@
             同期
           </v-btn>
           <v-btn
+            v-if="showPrev()"
             fab
             text
-            small
+            normal
             color="grey darken-2"
             @click="prev"
           >
-            <v-icon small>
+            <v-icon large>
               mdi-chevron-left
             </v-icon>
           </v-btn>
           <v-btn
+            v-if="showNext()"
             fab
             text
-            small
+            normal
             color="grey darken-2"
             @click="next"
           >
-            <v-icon small>
+            <v-icon large>
               mdi-chevron-right
             </v-icon>
           </v-btn>
           <v-toolbar-title v-if="$refs.calendar">
             {{ $refs.calendar.title }}
           </v-toolbar-title>
+          <v-toolbar-title v-else>
+            {{ calendarTitle }}
+          </v-toolbar-title>
+          
           <v-spacer></v-spacer>
         </v-toolbar>
       </v-sheet>
-      <v-sheet height="1000">
+      <v-sheet height="600">
         <v-calendar
           ref="calendar"
           v-model="value"
           color="primary"
-          type="4day"
+          type="week"
+          :start="startDate"
+          :end="endDate"
           :events="events"
           :event-color="getEventColor"
           :event-ripple="false"
@@ -136,13 +144,68 @@
       createEvent: null,
       createStart: null,
       extendOriginal: null,
+      startDate: new Date("2022-01-25 0:00"),
+      endDate:  new Date("2022-01-31 23:59"),
+      firstShowNext: false,
+      firstShowPrev: false,
+      calendarTitle: ''
     }),
     mounted () {
       this.$refs.calendar.checkChange()
+      this.events.push({
+          color: "#3F51B5",
+          end: this.endDate.getTime(),
+          name: "日程調整対象",
+          start: this.startDate.getTime(),
+          timed: false
+        })
+      this.calendarTitle = this.$refs.calendar.title
+      const weekFirst = new Date(this.$refs.calendar.renderProps.start['date']).getTime()
+      const weekLast = new Date(this.$refs.calendar.renderProps.end['date']).getTime()
+
+      if (weekFirst >= this.startDate.getTime()){
+        this.firstShowPrev = true
+      } else {
+        this.firstShowPrev = false
+      }
+      if (weekLast <= this.endDate.getTime()){
+        this.firstShowNext = true
+      } else {
+        this.firstShowNext = false
+      }
     },
     computed: {
     },
     methods: {
+      scrollToTime () {
+        const time = this.getCurrentTime()
+        const first = Math.max(0, time - (time % 30) - 30)
+
+        this.$refs.calendar.scrollToTime(first)
+      },
+      showNext() {
+        console.log('hogehoge')
+        if (this.$refs.calendar){
+          const weekLast = new Date(this.$refs.calendar.renderProps.end['date']).getTime()
+          if (weekLast <= this.endDate.getTime()){
+            return true
+          }
+
+          return false
+        }
+        return this.firstShowNext
+      },
+      showPrev() {
+        if (this.$refs.calendar){
+          const weekFirst = new Date(this.$refs.calendar.renderProps.start['date']).getTime()
+          if (weekFirst >= this.startDate.getTime()){
+            return true
+          }
+
+          return false
+        }
+        return this.firstShowPrev
+      },
       setToday () {
         this.value = ''
       },
@@ -161,13 +224,15 @@
       },
       startTime (tms) {
         const mouse = this.toTime(tms)
-
+        const roundTime = this.roundTime(mouse)
+        if(!(roundTime >= this.startDate.getTime() && roundTime <= this.endDate.getTime())){
+          return
+        }
         if (this.dragEvent && this.dragTime === null) {
           const start = this.dragEvent.start
-
           this.dragTime = mouse - start
         } else {
-          this.createStart = this.roundTime(mouse)
+          this.createStart = roundTime
           this.createEvent = {
             name: `${this.userName} 予定あり`,
             color: this.rndElement(this.colors),
@@ -178,7 +243,6 @@
 
           this.events.push(this.createEvent)
         }
-        console.log(this.events)
       },
       extendBottom (event) {
         this.createEvent = event
@@ -189,7 +253,6 @@
         const mouse = this.toTime(tms)
 
         if (this.dragEvent && this.dragTime !== null) {
-          console.log(this.dragEvent.userId)
           const start = this.dragEvent.start
           const end = this.dragEvent.end
           const duration = end - start
@@ -264,25 +327,28 @@
         const eventCount = this.rnd(days, days + 20)
 
         for (let i = 0; i < eventCount; i++) {
+          const timed = this.rnd(0, 3) !== 0
+          const firstTimestamp = this.rnd(min, max)
+          const secondTimestamp = this.rnd(2, timed ? 8 : 288) * 900000
+          const start = firstTimestamp - (firstTimestamp % 900000)
+          const end = start + secondTimestamp
 
-          /*events.push({
-            name: aname,
-            color: colo,
+          events.push({
+            name: this.rndElement(this.names),
+            color: this.rndElement(this.colors),
             start,
             end,
             timed,
-          })*/
-          //console.log(aname,colo,start,end,timed)
+          })
         }
         events.push({
-          name: 'こねずみ',
-          color: '#00BCD4',
-          start: 1641273300000,
-          end: 1641276900000,
-          timed: true,
-          userId: 1,
+          color: "#3F51B5",
+          end: 1653103900000,
+          name: "日程調整対象",
+          start: 1642917600000,
+          timed: false
         })
-        this.events = events
+        //this.events = events
       },
       rnd (a, b) {
         return Math.floor((b - a + 1) * Math.random()) + a
