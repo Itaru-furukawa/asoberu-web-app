@@ -181,6 +181,10 @@ DEPENDENCIES
   bootsnap (>= 1.4.2)
   byebug
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  database_cleaner
+>>>>>>> 0fc4dfdc0879d4acc1ed7af198633e2156f6c123
 =======
   database_cleaner
 >>>>>>> 0fc4dfdc0879d4acc1ed7af198633e2156f6c123
