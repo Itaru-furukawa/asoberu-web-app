@@ -184,7 +184,6 @@
         this.$refs.calendar.scrollToTime(first)
       },
       showNext() {
-        console.log('hogehoge')
         if (this.$refs.calendar){
           const weekLast = new Date(this.$refs.calendar.renderProps.end['date']).getTime()
           if (weekLast <= this.endDate.getTime()){
@@ -243,6 +242,7 @@
 
           this.events.push(this.createEvent)
         }
+        console.log(this.events)
       },
       extendBottom (event) {
         this.createEvent = event
@@ -349,6 +349,7 @@
           timed: false
         })
         //this.events = events
+        
       },
       rnd (a, b) {
         return Math.floor((b - a + 1) * Math.random()) + a
