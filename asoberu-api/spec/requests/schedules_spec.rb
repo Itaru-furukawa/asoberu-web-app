@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'rails_helper'
 
 describe 'Schedule #get' do
@@ -18,7 +17,6 @@ describe 'Schedule #get' do
     end
   end
 end
-
 
 describe 'Schedule #post' do
   context 'postしたとき' do

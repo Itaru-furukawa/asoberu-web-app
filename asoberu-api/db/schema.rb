@@ -10,23 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_04_033726) do
+ActiveRecord::Schema.define(version: 2022_01_05_030820) do
 
   create_table "events", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.bigint "schedule_id"
+    t.bigint "member_id"
     t.string "name"
+    t.bigint "start"
+    t.bigint "end"
+    t.boolean "timed"
+    t.string "color"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["member_id"], name: "fk_rails_067da086a9"
     t.index ["schedule_id"], name: "fk_rails_0f9aa51f56"
   end
 
   create_table "members", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.bigint "schedule_id"
     t.string "name"
-    t.bigint "start"
-    t.bigint "end"
-    t.boolean "timed"
-    t.string "color"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.index ["schedule_id"], name: "fk_rails_dbb4414dd7"
@@ -42,6 +44,7 @@ ActiveRecord::Schema.define(version: 2022_01_04_033726) do
     t.datetime "updated_at"
   end
 
+  add_foreign_key "events", "members"
   add_foreign_key "events", "schedules"
   add_foreign_key "members", "schedules"
 end

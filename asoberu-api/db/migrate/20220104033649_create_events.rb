@@ -1,8 +1,13 @@
 class CreateEvents < ActiveRecord::Migration[6.0]
   def change
     create_table :events do |t|
-      t.references :schedule, foreign_key: true, index: false
+      t.bigint :schedule_id, index: false
+      t.bigint :member_id, index: false
       t.string :name
+      t.bigint :start
+      t.bigint :end
+      t.boolean :timed
+      t.string :color
       t.datetime :created_at
       t.datetime :updated_at
     end
