@@ -14,8 +14,7 @@ class Api::V1::SchedulesController < ApplicationController
   end
 
   def create
-    schedule = Schedule.new(schedule_params)
-    schedule.save!
+    schedule = Schedule.create(schedule_params)
     render status: '200', json: { message: 'success', data: schedule}
   end
 

@@ -18,7 +18,6 @@ describe 'Schedule #get' do
   end
 end
 
-
 describe 'Schedule #post' do
   context 'postしたとき' do
     it '該当するスケジュールが取得できること' do

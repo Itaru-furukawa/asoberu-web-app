@@ -1,7 +1,8 @@
 class Api::V1::EventsController < ApplicationController
   def index
-    events = Event.where(schedule_id: params[:id], password: params[:password])
-    if events.present?
+    schedule = Schedule.where(id: params[:schedule_id], password: params[:password]).first
+    if schedule.present?
+      events = schedule.events
       render status: '200', json: { message: 'success', data: events }
     else
       render status: '404', json: { message: 'bad request'}
@@ -9,9 +10,10 @@ class Api::V1::EventsController < ApplicationController
   end
 
   def show
-    schedule = Schedule.where(id: params[:id], password: params[:password])
+    schedule = Schedule.where(id: params[:id], password: params[:password]).first
     if schedule.present?
-      render status: '200', json: { message: 'success', data: schedule }
+      events = schedule.events.where(member_id: params[:member_id])
+      render status: '200', json: { message: 'success', data: events }
     else
       render status: '404', json: { message: 'bad request'}
     end
@@ -24,10 +26,18 @@ class Api::V1::EventsController < ApplicationController
   end
 
   def update
-    schedule = Schedule.where(id: params[:id], password: params[:password])
+    schedule = Schedule.where(id: params[:id], password: params[:password]).first
     if schedule.present?
-      schedule.update(schedule_params)
-      render status: '200', json: { message: 'success', data: schedule }
+      events = events_params
+      events.each do |event| 
+        if event[:id].present?
+          ev = Event.find(event[:id])
+          ev.update(event)
+        else
+          Event.create(event)
+        end
+      end
+      render status: '200', json: { message: 'success' }
     else
       render status: '404', json: { message: 'bad request'}
     end
@@ -35,7 +45,9 @@ class Api::V1::EventsController < ApplicationController
 
   private
 
-  def schedule_params
-    params.require(:schedule).permit(:name, :member_number, :password, :start_date, :end_date)
+  def events_params
+    params.require(:events).map do |event|
+      event.permit(:id, :name, :schedule_id, :member_id, :start, :timed, :color)
+    end
   end
 end

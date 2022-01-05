@@ -4,7 +4,7 @@ FactoryBot.define do
     schedule_id { 1 }
     member_id { 1 }
     start { 1643212800000 }
-    timed { TRUE }
+    timed { true }
     color { '#3F51B5' }
   end
 end
