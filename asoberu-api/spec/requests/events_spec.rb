@@ -12,6 +12,7 @@ describe 'event #index' do
       expect(response.status).to eq(200)
     end
 
+  context '取得したいスケジュールのパスワードが正しくないとき' do
     it 'イベントが取得できないこと' do
       get '/api/v1/events?schedule_id=1&password=invalid'
       json = JSON.parse(response.body)
