@@ -47,7 +47,7 @@ class Api::V1::EventsController < ApplicationController
 
   def events_params
     params.require(:events).map do |event|
-      event.permit(:id, :name, :schedule_id, :member_id, :start, :timed, :color)
+      event.permit(:id, :name, :schedule_id, :member_id, :start, :end, :timed, :color)
     end
   end
 end
