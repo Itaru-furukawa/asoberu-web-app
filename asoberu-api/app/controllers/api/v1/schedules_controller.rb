@@ -5,7 +5,7 @@ class Api::V1::SchedulesController < ApplicationController
   end
 
   def show
-    schedule = Schedule.where(id: params[:id], password: params[:password])
+    schedule = Schedule.where(id: params[:id], password: params[:password]).first
     if schedule.present?
       render status: '200', json: {message: 'success', data: schedule}
     else
@@ -19,7 +19,7 @@ class Api::V1::SchedulesController < ApplicationController
   end
 
   def update
-    schedule = Schedule.where(id: params[:id], password: params[:password])
+    schedule = Schedule.where(id: params[:id], password: params[:password]).first
     if schedule.present?
       schedule.update(schedule_params)
       render status: '200', json: { message: 'success', data: schedule}

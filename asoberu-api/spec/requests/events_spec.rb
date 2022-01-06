@@ -55,6 +55,7 @@ describe 'event #update' do
             schedule_id: 1,
             member_id: 1,
             start: 1643212800000,
+            end: 1643232800000,
             timed: true,
             color: '#3F51B5'
           },

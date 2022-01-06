@@ -8,15 +8,16 @@
           <v-btn
             outlined
             class="mr-4"
-            color="grey darken-2"
-            @click="setToday"
+            color="primary darken-2"
+            @click="postEvents"
           >
-            戻す
+            保存して同期する
           </v-btn>
           <v-btn
             outlined
             class="mr-4"
             color="grey darken-2"
+            @click="fetchEvents"
           >
             同期
           </v-btn>
@@ -65,7 +66,6 @@
           :events="events"
           :event-color="getEventColor"
           :event-ripple="false"
-          @change="getEvents"
           @mousedown:event="startDrag"
           @mousedown:time="startTime"
           @mousemove:time="mouseMove"
@@ -130,9 +130,11 @@
 <script>
   export default {
     props: {
-      userName: {
-        type: String
-      }
+      userName: String,
+      startDate: Date,
+      endDate: Date,
+      scheduleId: Number,
+      password: String
     },
     data: () => ({
       value: '',
@@ -144,39 +146,98 @@
       createEvent: null,
       createStart: null,
       extendOriginal: null,
-      startDate: new Date("2022-01-25 0:00"),
-      endDate:  new Date("2022-01-31 23:59"),
       firstShowNext: false,
       firstShowPrev: false,
       calendarTitle: ''
     }),
-    mounted () {
-      this.$refs.calendar.checkChange()
-      this.events.push({
-          color: "#3F51B5",
-          end: this.endDate.getTime(),
-          name: "日程調整対象",
-          start: this.startDate.getTime(),
-          timed: false
-        })
-      this.calendarTitle = this.$refs.calendar.title
-      const weekFirst = new Date(this.$refs.calendar.renderProps.start['date']).getTime()
-      const weekLast = new Date(this.$refs.calendar.renderProps.end['date']).getTime()
+    created(){
+    },
+    watch: {
+      startDate: {
+        handler: function(){
+          this.$refs.calendar.checkChange()
+          this.events.push({
+            color: "#3F51B5",
+            end: this.endDate.getTime(),
+            name: "日程調整対象",
+            start: this.startDate.getTime(),
+            timed: false
+          })
+          this.calendarTitle = this.$refs.calendar.title
+          const weekFirst = new Date(this.$refs.calendar.renderProps.start['date']).getTime()
+          const weekLast = new Date(this.$refs.calendar.renderProps.end['date']).getTime()
 
-      if (weekFirst >= this.startDate.getTime()){
-        this.firstShowPrev = true
-      } else {
-        this.firstShowPrev = false
+          if (weekFirst >= this.startDate.getTime()){
+            this.firstShowPrev = true
+          } else {
+            this.firstShowPrev = false
+          }
+          if (weekLast <= this.endDate.getTime()){
+            this.firstShowNext = true
+          } else {
+            this.firstShowNext = false
+          }
+        }
       }
-      if (weekLast <= this.endDate.getTime()){
-        this.firstShowNext = true
-      } else {
-        this.firstShowNext = false
+    },
+    mounted () {
+      if(this.startDate){
+        this.$refs.calendar.checkChange()
+        this.events.push({
+            color: "#3F51B5",
+            end: this.endDate.getTime(),
+            name: "日程調整対象",
+            start: this.startDate.getTime(),
+            timed: false
+          })
+        this.calendarTitle = this.$refs.calendar.title
+        const weekFirst = new Date(this.$refs.calendar.renderProps.start['date']).getTime()
+        const weekLast = new Date(this.$refs.calendar.renderProps.end['date']).getTime()
+
+        if (weekFirst >= this.startDate.getTime()){
+          this.firstShowPrev = true
+        } else {
+          this.firstShowPrev = false
+        }
+        if (weekLast <= this.endDate.getTime()){
+          this.firstShowNext = true
+        } else {
+          this.firstShowNext = false
+        }
       }
     },
     computed: {
     },
     methods: {
+      postEvents () {
+        const events = this.events.filter(event => {return event.new == true})
+        console.log(events)
+        if (events.length){
+          this.axios.put(`http://localhost:3000/api/v1/events/${this.scheduleId}?password=${this.password}`, { 
+            events: events
+          })
+          .then(response => {
+            console.log(response)
+          })
+          .catch(error => console.log(alert(error)))
+          // this.fetchEvents()
+        }
+      },
+      fetchEvents () {
+        this.axios.get(`http://localhost:3000/api/v1/events/?schedule_id=${this.scheduleId}&password=${this.password}`)
+        .then(response => {
+          console.log(response)
+          this.events = response.data.data
+          this.events.push({
+            color: "#3F51B5",
+            end: this.endDate.getTime(),
+            name: "日程調整対象",
+            start: this.startDate.getTime(),
+            timed: false
+          })
+        })
+        .catch(error => console.log(alert(error)))
+      },
       scrollToTime () {
         const time = this.getCurrentTime()
         const first = Math.max(0, time - (time % 30) - 30)
@@ -233,16 +294,19 @@
         } else {
           this.createStart = roundTime
           this.createEvent = {
+            schedule_id: this.scheduleId,
+            member_id: 1,
             name: `${this.userName} 予定あり`,
             color: this.rndElement(this.colors),
             start: this.createStart,
             end: this.createStart,
             timed: true,
+            new: true
           }
 
           this.events.push(this.createEvent)
         }
-        console.log(this.events)
+        console.log(this.newEvents)
       },
       extendBottom (event) {
         this.createEvent = event
@@ -262,13 +326,14 @@
 
           this.dragEvent.start = newStart
           this.dragEvent.end = newEnd
+          this.dragEvent.new = true
         } else if (this.createEvent && this.createStart !== null) {
           const mouseRounded = this.roundTime(mouse, false)
           const min = Math.min(mouseRounded, this.createStart)
           const max = Math.max(mouseRounded, this.createStart)
-
           this.createEvent.start = min
           this.createEvent.end = max
+          this.createEvent.new = true
         }
       },
       endDrag () {
@@ -318,39 +383,38 @@
             ? `rgba(${r}, ${g}, ${b}, 0.7)`
             : event.color
       },
-      getEvents ({ start, end }) {
-        const events = []
+      // getEvents ({ start, end }) {
+      //   const events = []
 
-        const min = new Date(`${start.date}T00:00:00`).getTime()
-        const max = new Date(`${end.date}T23:59:59`).getTime()
-        const days = (max - min) / 86400000
-        const eventCount = this.rnd(days, days + 20)
+      //   const min = new Date(`${start.date}T00:00:00`).getTime()
+      //   const max = new Date(`${end.date}T23:59:59`).getTime()
+      //   const days = (max - min) / 86400000
+      //   const eventCount = this.rnd(days, days + 20)
 
-        for (let i = 0; i < eventCount; i++) {
-          const timed = this.rnd(0, 3) !== 0
-          const firstTimestamp = this.rnd(min, max)
-          const secondTimestamp = this.rnd(2, timed ? 8 : 288) * 900000
-          const start = firstTimestamp - (firstTimestamp % 900000)
-          const end = start + secondTimestamp
+      //   for (let i = 0; i < eventCount; i++) {
+      //     const timed = this.rnd(0, 3) !== 0
+      //     const firstTimestamp = this.rnd(min, max)
+      //     const secondTimestamp = this.rnd(2, timed ? 8 : 288) * 900000
+      //     const start = firstTimestamp - (firstTimestamp % 900000)
+      //     const end = start + secondTimestamp
 
-          events.push({
-            name: this.rndElement(this.names),
-            color: this.rndElement(this.colors),
-            start,
-            end,
-            timed,
-          })
-        }
-        events.push({
-          color: "#3F51B5",
-          end: 1653103900000,
-          name: "日程調整対象",
-          start: 1642917600000,
-          timed: false
-        })
-        //this.events = events
-        
-      },
+      //     events.push({
+      //       name: this.rndElement(this.names),
+      //       color: this.rndElement(this.colors),
+      //       start,
+      //       end,
+      //       timed,
+      //     })
+      //   }
+      //   events.push({
+      //     color: "#3F51B5",
+      //     end: 1653103900000,
+      //     name: "日程調整対象",
+      //     start: 1642917600000,
+      //     timed: false
+      //   })
+      //   //this.events = events
+      // },
       rnd (a, b) {
         return Math.floor((b - a + 1) * Math.random()) + a
       },

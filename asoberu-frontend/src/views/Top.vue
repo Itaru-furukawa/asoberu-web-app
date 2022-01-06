@@ -31,7 +31,7 @@
                 </v-card-title>
                 <v-container class='space-playground pa-5'>
                   <v-text-field
-                    v-model="scheduleId"
+                    v-model="joinScheduleId"
                     type='number'
                     label="スケジュールID"
                   >
@@ -52,7 +52,7 @@
                   </v-btn>
                   <v-btn
                     color="primary"
-                    @click="e1 = 1"
+                    @click="fetchSchedule"
                   >
                     参加
                   </v-btn>
@@ -105,7 +105,7 @@
                         >
                         </v-text-field>
                         <v-text-field
-                          v-model="peopleNum"
+                          v-model="memberNumber"
                           label="人数"
                           type="number"
                         >
@@ -170,7 +170,7 @@
                           </v-btn>
                           <v-btn
                             color="primary"
-                            @click="e1 = 1"
+                            @click="createSchedule()"
                           >
                             作成
                           </v-btn>
@@ -225,16 +225,78 @@ export default {
     dialog1: false,
     dialog2: false,
     scheduleName: '',
-    peopleNum: '',
+    memberNumber: '',
     password: '',
     dates: [],
     scheduleId: '',
-    joinSchedulePassword: ''
+    joinScheduleId: sessionStorage.getItem('scheduleId'),
+    joinSchedulePassword: sessionStorage.getItem('password'),
+    schedule: {}
   }),
   computed: {
     dateRangeText () {
+      this.swapDate()
       return this.dates.join(' ~ ')
     },
+  },
+  methods: {
+    scheduleParams(){
+      return {
+        name: this.scheduleName,
+        member_number: this.memberNumber,
+        password: this.password,
+        start_date: new Date(`${this.dates[0]}T00:00:00`),
+        end_date: new Date(`${this.dates[1]}T23:59:59`) 
+      }
+    },
+    defaultMembers(scheduleId){
+      const members = []
+      for(let i = 0; i < this.memberNumber; i++){
+        members.push({name: `新規ユーザー${i+1}`, schedule_id: scheduleId})
+      }
+      return members
+    },
+    createSchedule(){
+      this.axios.post('http://localhost:3000/api/v1/schedules', { 
+        schedule: this.scheduleParams()
+      })
+      .then(response => {
+        const scheduleId = response.data['data'].id
+        const password = response.data['data'].password
+        if(scheduleId && password){
+          sessionStorage.setItem('scheduleId', scheduleId)
+          sessionStorage.setItem('password', password)
+        }
+        this.schedule = response.data
+        this.createMembers(scheduleId, password)
+      })
+      .catch(error => console.log(alert(error)))
+    },
+    createMembers(scheduleId, password){
+      this.axios.post(`http://localhost:3000/api/v1/members?schedule_id=${scheduleId}&password=${password}`, { 
+        members: this.defaultMembers(scheduleId)
+      })
+      .then(this.$router.push({name: 'Schedule', params: this.schedule}))
+      .catch(error => console.log(alert(error)))
+    },
+    swapDate(){
+      let startDate = new Date(this.dates[0]).getTime()
+      let endDate = new Date(this.dates[1]).getTime()
+      if (startDate > endDate){
+        let tmp = this.dates[0]
+        this.dates[0] = this.dates[1]
+        this.dates[1] = tmp
+      }
+    },
+    fetchSchedule(){
+      this.axios.get(`http://localhost:3000/api/v1/schedules/${this.joinScheduleId}?password=${this.joinSchedulePassword}`)
+        .then(response => {
+          sessionStorage.setItem('scheduleId', this.joinScheduleId)
+          sessionStorage.setItem('password', this.joinSchedulePassword)
+          this.$router.push({name: 'Schedule', params: response.data['data']})
+        })
+        .catch(error => alert(error,'正しいID、パスワードを入力してください'))
+    }
   }
 };
 </script>

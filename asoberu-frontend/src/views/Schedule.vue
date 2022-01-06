@@ -51,7 +51,26 @@
         </v-row>
       </v-container>
     </v-card>
-    <calendar :userName="userName"></calendar>
+    <div>
+      <calendar
+        :userName="userName"
+        :startDate="startDate"
+        :endDate="endDate"
+        :scheduleId="scheduleId"
+        :password="password">
+      </calendar>
+    </div>
+    <div class='spacing-playground mt-8 mb-12 d-flex justify-end'>
+      <v-btn
+        outlined
+        color="grey"
+        dark
+        @click="toTop()"
+        class='font-weight-bold space-playground my-auto'
+      >
+        トップに戻る
+      </v-btn>
+    </div>
   </v-main>
 </template>
 
@@ -76,14 +95,52 @@ export default {
   },
   
   data: () => ({
-    userName: 'wawa',
-    scheduleId: 3,
-    scheduleName: 'わわわ'
+    userName: '',
+    scheduleId: undefined,
+    scheduleName: '',
+    password: '',
+    startDate: undefined,
+    endDate: undefined
   }),
   computed: {
     dateRangeText () {
       return this.dates.join(' ~ ')
     },
+  },
+  methods: {
+    toTop(){
+      this.$router.push({name: 'Top'})
+    },
+    fetchSchedule(){
+      const scheduleId = sessionStorage.getItem('scheduleId')
+      const password = sessionStorage.getItem('password')
+      if(typeof scheduleId !== 'undefined' && typeof password !== 'undefined'){
+        this.axios.get(`http://localhost:3000/api/v1/schedules/${scheduleId}?password=${password}`)
+          .then(response => {
+            this.scheduleId = response.data['data'].id
+            this.scheduleName = response.data['data'].name
+            this.password = response.data['data'].password
+            this.startDate = new Date(response.data['data'].start_date)
+            this.endDate = new Date(response.data['data'].end_date)
+          })
+          .catch(error => alert(error))
+      } else {
+        alert('セッション切れです!')
+        this.$routes.push({name: 'Top'})
+      }
+    }
+  },
+  created(){
+    console.log('schdulenの作成開始！')
+    if (!this.$route.params.id){
+      this.fetchSchedule()
+    } else {
+      this.scheduleId = this.$route.params.id
+      this.scheduleName = this.$route.params.name
+      this.password = this.$route.params.password
+      this.startDate = new Date(this.$route.params.start_date)
+      this.endDate = new Date(this.$route.params.end_date)
+    }
   }
 };
 </script>
