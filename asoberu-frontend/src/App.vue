@@ -6,7 +6,7 @@
       dark
     >
       <div class="d-flex align-center">
-        <h1>Asoberu</h1>
+        <h1>Asoberu（プロトタイプ）</h1>
       </div>
 
       <v-spacer></v-spacer>
