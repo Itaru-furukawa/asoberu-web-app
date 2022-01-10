@@ -213,7 +213,7 @@
         const events = this.events.filter(event => {return event.new == true})
         console.log(events)
         if (events.length){
-          this.axios.put(`http://localhost:3000/api/v1/events/${this.scheduleId}?password=${this.password}`, { 
+          this.axios.put(`${process.env.VUE_APP_API_HOST_NAME}/api/v1/events/${this.scheduleId}?password=${this.password}`, { 
             events: events
           })
           .then(response => {
@@ -224,7 +224,7 @@
         }
       },
       fetchEvents () {
-        this.axios.get(`http://localhost:3000/api/v1/events/?schedule_id=${this.scheduleId}&password=${this.password}`)
+        this.axios.get(`${process.env.VUE_APP_API_HOST_NAME}/api/v1/events/?schedule_id=${this.scheduleId}&password=${this.password}`)
         .then(response => {
           console.log(response)
           this.events = response.data.data
@@ -295,7 +295,7 @@
           this.createStart = roundTime
           this.createEvent = {
             schedule_id: this.scheduleId,
-            member_id: 1,
+            member_id: 4,
             name: `${this.userName} 予定あり`,
             color: this.rndElement(this.colors),
             start: this.createStart,

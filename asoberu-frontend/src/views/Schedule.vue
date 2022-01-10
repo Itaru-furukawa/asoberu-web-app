@@ -115,7 +115,7 @@ export default {
       const scheduleId = sessionStorage.getItem('scheduleId')
       const password = sessionStorage.getItem('password')
       if(typeof scheduleId !== 'undefined' && typeof password !== 'undefined'){
-        this.axios.get(`http://localhost:3000/api/v1/schedules/${scheduleId}?password=${password}`)
+        this.axios.get(`${process.env.VUE_APP_API_HOST_NAME}/api/v1/schedules/${scheduleId}?password=${password}`)
           .then(response => {
             this.scheduleId = response.data['data'].id
             this.scheduleName = response.data['data'].name

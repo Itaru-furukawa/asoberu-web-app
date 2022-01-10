@@ -257,7 +257,7 @@ export default {
       return members
     },
     createSchedule(){
-      this.axios.post('http://localhost:3000/api/v1/schedules', { 
+      this.axios.post(`${process.env.VUE_APP_API_HOST_NAME}/api/v1/schedules`, { 
         schedule: this.scheduleParams()
       })
       .then(response => {
@@ -273,7 +273,7 @@ export default {
       .catch(error => console.log(alert(error)))
     },
     createMembers(scheduleId, password){
-      this.axios.post(`http://localhost:3000/api/v1/members?schedule_id=${scheduleId}&password=${password}`, { 
+      this.axios.post(`${process.env.VUE_APP_API_HOST_NAME}/api/v1/members?schedule_id=${scheduleId}&password=${password}`, { 
         members: this.defaultMembers(scheduleId)
       })
       .then(this.$router.push({name: 'Schedule', params: this.schedule}))
@@ -289,7 +289,7 @@ export default {
       }
     },
     fetchSchedule(){
-      this.axios.get(`http://localhost:3000/api/v1/schedules/${this.joinScheduleId}?password=${this.joinSchedulePassword}`)
+      this.axios.get(`${process.env.VUE_APP_API_HOST_NAME}/api/v1/schedules/${this.joinScheduleId}?password=${this.joinSchedulePassword}`)
         .then(response => {
           sessionStorage.setItem('scheduleId', this.joinScheduleId)
           sessionStorage.setItem('password', this.joinSchedulePassword)
